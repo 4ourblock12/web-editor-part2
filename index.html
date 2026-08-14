@@ -232,6 +232,11 @@
                     <option value="tcg">28. Card Game / TCG</option>
                     <option value="puzzle">29. Mystery / Puzzle</option>
                     <option value="comic">30. Superhero / Comic Book</option>
+                    <!-- Tambahan 4 Tema Baru -->
+                    <option value="dark_fantasy">31. Dark Fantasy / Mythic</option>
+                    <option value="medieval">32. Medieval / Knights</option>
+                    <option value="nature">33. Natural / Alam</option>
+                    <option value="minecraft">34. Minecraft / Blocky</option>
                 </select>
             </div>
 
@@ -257,7 +262,7 @@
             <div class="canvas-container">
                 <canvas id="gameCanvas" width="1000" height="250"></canvas>
             </div>
-            <p class="instructions">Resolusi Internal HD 1000x250 px.<br>Pilih dari 20 tema unik untuk segala jenis game!</p>
+            <p class="instructions">Resolusi Internal HD 1000x250 px.<br>Pilih dari 34 tema unik untuk segala jenis game!</p>
         </div>
     </div>
 
@@ -879,6 +884,86 @@
                     c.fill();
                     c.lineWidth = 15; c.strokeStyle = '#ffffff'; c.strokeRect(0, 0, w, h); // Page border
                 }
+            },
+            dark_fantasy: {
+                titleFont: "'Cinzel', serif", titleSize: 58, titleColor: '#a9a9a9', titleShadow: '#8b0000',
+                subFont: "italic 'Cinzel', serif", subSize: 28, subColor: '#8b0000', subShadow: '#000000',
+                pixelatedImage: false, shadowOffsetX: 3, shadowOffsetY: 3, outline: false,
+                drawBackground: (c, w, h) => {
+                    c.fillStyle = '#0a0a0a'; c.fillRect(0, 0, w, h);
+                    // Dark red mist
+                    const mist = c.createLinearGradient(0, 0, 0, h);
+                    mist.addColorStop(0, 'rgba(139,0,0,0.2)'); mist.addColorStop(1, 'rgba(0,0,0,1)');
+                    c.fillStyle = mist; c.fillRect(0, 0, w, h);
+                    // Bare trees silhouettes
+                    c.strokeStyle = '#000000'; c.lineWidth = 4;
+                    for(let i=0; i<w; i+=80) {
+                        c.beginPath(); c.moveTo(i, h); c.lineTo(i+10, h-60); c.lineTo(i+5, h-100); c.stroke();
+                        c.beginPath(); c.moveTo(i+10, h-60); c.lineTo(i+25, h-80); c.stroke();
+                    }
+                }
+            },
+            medieval: {
+                titleFont: "'MedievalSharp', cursive", titleSize: 60, titleColor: '#e0e0e0', titleShadow: '#404040',
+                subFont: "'Georgia', serif", subSize: 28, subColor: '#ffd700', subShadow: '#000000',
+                pixelatedImage: false, shadowOffsetX: 4, shadowOffsetY: 4, outline: false,
+                drawBackground: (c, w, h) => {
+                    c.fillStyle = '#555555'; c.fillRect(0, 0, w, h); // Stone base
+                    // Stone bricks
+                    c.strokeStyle = '#333333'; c.lineWidth = 2;
+                    for(let y=0; y<h; y+=30) {
+                        c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
+                        let offset = (y/30)%2 === 0 ? 0 : 40;
+                        for(let x=offset; x<w; x+=80) {
+                            c.beginPath(); c.moveTo(x, y); c.lineTo(x, y+30); c.stroke();
+                        }
+                    }
+                    // Red banner on the side
+                    c.fillStyle = '#8b0000'; c.fillRect(w - 100, 0, 60, h);
+                    c.fillStyle = '#ffd700'; c.fillRect(w - 95, 0, 5, h); c.fillRect(w - 50, 0, 5, h);
+                }
+            },
+            nature: {
+                titleFont: "'Fredoka', sans-serif", titleSize: 56, titleColor: '#ffffff', titleShadow: '#228b22',
+                subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#adff2f', subShadow: '#006400',
+                pixelatedImage: false, shadowOffsetX: 3, shadowOffsetY: 3, outline: false,
+                drawBackground: (c, w, h) => {
+                    const grad = c.createLinearGradient(0,0,0,h);
+                    grad.addColorStop(0, '#4caf50'); grad.addColorStop(1, '#1b5e20');
+                    c.fillStyle = grad; c.fillRect(0, 0, w, h);
+                    // Sun rays
+                    c.fillStyle = 'rgba(255,255,255,0.1)';
+                    for(let i=0; i<w; i+=60) {
+                        c.beginPath(); c.moveTo(i, 0); c.lineTo(i+40, h); c.lineTo(i+80, h); c.lineTo(i+30, 0); c.fill();
+                    }
+                    // Leaves bubbles
+                    c.fillStyle = 'rgba(129, 199, 132, 0.5)';
+                    for(let i=0; i<20; i++) {
+                        c.beginPath(); c.arc(Math.random()*w, Math.random()*h, Math.random()*20+10, 0, Math.PI*2); c.fill();
+                    }
+                }
+            },
+            minecraft: {
+                titleFont: "'Silkscreen', monospace", titleSize: 52, titleColor: '#ffffff', titleShadow: '#333333',
+                subFont: "'Silkscreen', monospace", subSize: 26, subColor: '#aaaaaa', subShadow: '#000000',
+                pixelatedImage: true, shadowOffsetX: 4, shadowOffsetY: 4, outline: false,
+                drawBackground: (c, w, h) => {
+                    // Dirt background
+                    c.fillStyle = '#8b5a2b'; c.fillRect(0, 0, w, h);
+                    c.fillStyle = '#704822';
+                    for(let i=0; i<w; i+=16) {
+                        for(let j=0; j<h; j+=16) {
+                            if(Math.random()>0.5) c.fillRect(i, j, 16, 16);
+                        }
+                    }
+                    // Grass block top
+                    c.fillStyle = '#55aa55'; c.fillRect(0, 0, w, 32);
+                    c.fillStyle = '#338833';
+                    for(let i=0; i<w; i+=16) {
+                        c.fillRect(i, 0, 16, 16);
+                        if(Math.random()>0.5) c.fillRect(i, 16, 16, 16);
+                    }
+                }
             }
         };
 
@@ -949,13 +1034,13 @@
         function drawDefaultIcon(c, x, y, size, themeId) {
             c.save();
             // Ikon default yang menyesuaikan dengan gaya tema
-            if (themeId === 'retro' || themeId === 'voxel') {
+            if (themeId === 'retro' || themeId === 'voxel' || themeId === 'minecraft') {
                 c.fillStyle = '#ffff00'; c.beginPath(); c.arc(x + size/2, y + size/2, size/2.5, 0.2 * Math.PI, 1.8 * Math.PI); c.lineTo(x + size/2, y + size/2); c.fill();
-            } else if (themeId === 'fantasy' || themeId === 'magic' || themeId === 'strategy' || themeId === 'tcg') {
+            } else if (themeId === 'fantasy' || themeId === 'magic' || themeId === 'strategy' || themeId === 'tcg' || themeId === 'dark_fantasy' || themeId === 'medieval') {
                 c.fillStyle = '#b8860b'; c.fillRect(x + size/2 - 20, y + 20, 40, size - 40); c.fillStyle = '#fff'; c.fillRect(x + size/2 - 5, y + 30, 10, size - 60);
             } else if (themeId === 'shooter' || themeId === 'racing' || themeId === 'mecha' || themeId === 'comic') {
                 c.fillStyle = '#ff0000'; c.beginPath(); c.moveTo(x+size/2, y+20); c.lineTo(x+size-20, y+size-20); c.lineTo(x+20, y+size-20); c.fill();
-            } else if (themeId === 'gamehouse' || themeId === 'casual' || themeId === 'anime' || themeId === 'gacha' || themeId === 'farm') {
+            } else if (themeId === 'gamehouse' || themeId === 'casual' || themeId === 'anime' || themeId === 'gacha' || themeId === 'farm' || themeId === 'nature') {
                 c.fillStyle = '#ff69b4'; c.beginPath(); c.arc(x + size/2, y + size/2 - 10, size/3, Math.PI, 0); c.arc(x + size/2 + size/3, y + size/2 - 10, size/3, Math.PI, 0); c.lineTo(x + size/2, y + size - 20); c.fill(); // Heart
             } else {
                 c.fillStyle = '#888888'; c.fillRect(x + 20, y + 20, size - 40, size - 40);
