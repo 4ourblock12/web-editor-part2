@@ -897,10 +897,23 @@
                     c.fillStyle = mist; c.fillRect(0, 0, w, h);
                     // Bare trees silhouettes
                     c.strokeStyle = '#000000'; c.lineWidth = 4;
-                    for(let i=0; i<w; i+=80) {
+                    for(let i=0; i<w; i+=120) {
                         c.beginPath(); c.moveTo(i, h); c.lineTo(i+10, h-60); c.lineTo(i+5, h-100); c.stroke();
                         c.beginPath(); c.moveTo(i+10, h-60); c.lineTo(i+25, h-80); c.stroke();
                     }
+                    // Knight Silhouette
+                    c.fillStyle = '#111111';
+                    let kx = w - 120, ky = h;
+                    // Body & Legs
+                    c.beginPath(); c.moveTo(kx, ky); c.lineTo(kx-15, ky-60); c.lineTo(kx-10, ky-100); c.lineTo(kx+10, ky-100); c.lineTo(kx+15, ky-60); c.lineTo(kx+20, ky); c.fill();
+                    // Helmet
+                    c.beginPath(); c.arc(kx, ky-105, 12, 0, Math.PI*2); c.fill();
+                    // Glowing red eye
+                    c.fillStyle = '#ff0000'; c.fillRect(kx-4, ky-108, 8, 3);
+                    // Sword
+                    c.strokeStyle = '#444444'; c.lineWidth = 4;
+                    c.beginPath(); c.moveTo(kx-25, ky-50); c.lineTo(kx-40, ky-5); c.stroke(); // Blade
+                    c.beginPath(); c.moveTo(kx-35, ky-45); c.lineTo(kx-15, ky-48); c.stroke(); // Crossguard
                 }
             },
             medieval: {
@@ -908,19 +921,37 @@
                 subFont: "'Georgia', serif", subSize: 28, subColor: '#ffd700', subShadow: '#000000',
                 pixelatedImage: false, shadowOffsetX: 4, shadowOffsetY: 4, outline: false,
                 drawBackground: (c, w, h) => {
-                    c.fillStyle = '#555555'; c.fillRect(0, 0, w, h); // Stone base
-                    // Stone bricks
-                    c.strokeStyle = '#333333'; c.lineWidth = 2;
-                    for(let y=0; y<h; y+=30) {
-                        c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
-                        let offset = (y/30)%2 === 0 ? 0 : 40;
-                        for(let x=offset; x<w; x+=80) {
-                            c.beginPath(); c.moveTo(x, y); c.lineTo(x, y+30); c.stroke();
-                        }
+                    // Sky
+                    const sky = c.createLinearGradient(0,0,0,h);
+                    sky.addColorStop(0, '#2c3e50'); sky.addColorStop(1, '#555555');
+                    c.fillStyle = sky; c.fillRect(0, 0, w, h);
+                    
+                    // Castle Silhouette
+                    c.fillStyle = '#1a1a1a';
+                    c.fillRect(0, h-40, w, 40); // Base wall
+                    for(let i=10; i<w-150; i+=120) {
+                        c.fillRect(i, h-100, 50, 100); // Tower
+                        // Battlements
+                        for(let j=0; j<50; j+=15) c.fillRect(i+j, h-110, 10, 10);
+                        // Lit Window
+                        c.fillStyle = '#f1c40f'; c.fillRect(i+20, h-70, 10, 20); c.fillStyle = '#1a1a1a';
                     }
-                    // Red banner on the side
-                    c.fillStyle = '#8b0000'; c.fillRect(w - 100, 0, 60, h);
-                    c.fillStyle = '#ffd700'; c.fillRect(w - 95, 0, 5, h); c.fillRect(w - 50, 0, 5, h);
+                    // Wall Battlements
+                    for(let i=0; i<w; i+=20) c.fillRect(i, h-50, 10, 10);
+
+                    // Foreground stone pillar
+                    c.fillStyle = '#444444'; c.fillRect(w - 120, 0, 100, h);
+                    c.strokeStyle = '#222222'; c.lineWidth = 2;
+                    for(let y=0; y<h; y+=30) {
+                        c.beginPath(); c.moveTo(w-120, y); c.lineTo(w-20, y); c.stroke();
+                        let offset = (y/30)%2 === 0 ? 0 : 50;
+                        c.beginPath(); c.moveTo(w-120 + offset, y); c.lineTo(w-120 + offset, y+30); c.stroke();
+                    }
+
+                    // Banner
+                    c.fillStyle = '#8b0000'; c.fillRect(w - 95, 0, 50, h);
+                    c.fillStyle = '#ffd700'; c.fillRect(w - 90, 0, 5, h); c.fillRect(w - 55, 0, 5, h);
+                    c.beginPath(); c.arc(w - 70, 80, 15, 0, Math.PI*2); c.fill();
                 }
             },
             nature: {
@@ -936,10 +967,22 @@
                     for(let i=0; i<w; i+=60) {
                         c.beginPath(); c.moveTo(i, 0); c.lineTo(i+40, h); c.lineTo(i+80, h); c.lineTo(i+30, 0); c.fill();
                     }
-                    // Leaves bubbles
-                    c.fillStyle = 'rgba(129, 199, 132, 0.5)';
-                    for(let i=0; i<20; i++) {
-                        c.beginPath(); c.arc(Math.random()*w, Math.random()*h, Math.random()*20+10, 0, Math.PI*2); c.fill();
+                    // Hanging vines
+                    c.strokeStyle = '#2e7d32'; c.lineWidth = 3;
+                    for(let i=10; i<w; i+=80) {
+                        let vineEnd = Math.random() * 60 + 40;
+                        c.beginPath(); c.moveTo(i, 0); c.quadraticCurveTo(i-20, vineEnd/2, i+10, vineEnd); c.stroke();
+                        // Leaves
+                        c.fillStyle = '#81c784';
+                        for(let j=15; j<vineEnd; j+=20) {
+                            c.beginPath(); c.ellipse(i+5, j, 8, 4, Math.PI/4, 0, Math.PI*2); c.fill();
+                            c.beginPath(); c.ellipse(i-5, j+10, 8, 4, -Math.PI/4, 0, Math.PI*2); c.fill();
+                        }
+                    }
+                    // Grass at bottom
+                    c.fillStyle = '#2e7d32';
+                    for(let i=0; i<w; i+=15) {
+                        c.beginPath(); c.moveTo(i, h); c.lineTo(i+5, h- (Math.random()*20+10)); c.lineTo(i+10, h); c.fill();
                     }
                 }
             },
