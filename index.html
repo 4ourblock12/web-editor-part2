@@ -785,10 +785,8 @@
                         c.beginPath(); c.moveTo(w/2, h); c.lineTo(w/2 + Math.cos(i*Math.PI/180)*w, h + Math.sin(i*Math.PI/180)*w);
                         c.lineTo(w/2 + Math.cos((i+15)*Math.PI/180)*w, h + Math.sin((i+15)*Math.PI/180)*w); c.fill();
                     }
-                    // Wooden Sign Board Frame
+                    // Wooden Sign Board Frame background
                     c.fillStyle = '#deb887'; c.fillRect(15, 15, w-30, h-30);
-                    c.strokeStyle = '#8b4513'; c.lineWidth = 4;
-                    c.strokeRect(15, 15, w-30, h-30); c.strokeRect(25, 25, w-50, h-50);
                     // Green Leaves/Vines in corner
                     c.fillStyle = '#32cd32';
                     c.beginPath(); c.arc(15, 15, 40, 0, Math.PI*2); c.arc(w-15, 15, 40, 0, Math.PI*2); c.fill();
@@ -1059,6 +1057,19 @@
 
             // 1. Gambar Background Tema
             theme.drawBackground(ctx, w, h);
+
+            // --- BINGKAI GANDA DINAMIS ---
+            // Menyesuaikan warna berdasarkan konfigurasi teks masing-masing tema
+            let frameColor = theme.titleShadow;
+            if (frameColor === 'transparent' || frameColor === '#000000') {
+                frameColor = theme.titleColor;
+            }
+            
+            ctx.strokeStyle = frameColor;
+            ctx.lineWidth = 4;
+            ctx.strokeRect(15, 15, w - 30, h - 30); // Bingkai Luar
+            ctx.strokeRect(25, 25, w - 50, h - 50); // Bingkai Dalam
+            // -----------------------------
 
             const iconSize = 160;
             const iconX = 40;
