@@ -277,7 +277,7 @@
     <div class="app-container">
 
         <div class="controls">
-            <h2>Title Maker (35 Themes)</h2>
+            <h2>Title Maker (36 Themes)</h2>
 
             <div class="input-group">
                 <label for="themeSelect">Tema game</label>
@@ -317,6 +317,7 @@
                     <option value="nature">33. Natural / Alam</option>
                     <option value="minecraft">34. Minecraft / Blocky</option>
                     <option value="harvest">35. Harvest / Ranch Sim</option>
+                    <option value="halloween">36. Halloween / Spooky</option>
                 </select>
             </div>
 
@@ -418,7 +419,7 @@
             <div class="preview-actions">
                 <button class="secondary" type="button" id="btnReroll">Acak latar</button>
             </div>
-            <p class="instructions">Resolusi internal HD 1000x250 px.<br>Pilih dari 35 tema unik untuk segala jenis game.</p>
+            <p class="instructions">Resolusi internal HD 1000x250 px.<br>Pilih dari 36 tema unik untuk segala jenis game.</p>
         </div>
     </div>
 
@@ -598,6 +599,18 @@
             c.fillStyle = '#ff0000'; c.beginPath(); c.moveTo(x+size/2, y+20); c.lineTo(x+size-20, y+size-20); c.lineTo(x+20, y+size-20); c.fill();
         } else if (['gamehouse', 'casual', 'anime', 'gacha', 'farm', 'nature', 'harvest'].includes(themeId)) {
             c.fillStyle = '#ff69b4'; c.beginPath(); c.arc(x + size/2, y + size/2 - 10, size/3, Math.PI, 0); c.arc(x + size/2 + size/3, y + size/2 - 10, size/3, Math.PI, 0); c.lineTo(x + size/2, y + size - 20); c.fill();
+        } else if (themeId === 'halloween') {
+            const cx = x + size/2, cy = y + size/2 + 8, r = size/3;
+            c.fillStyle = '#ff7a00'; c.beginPath(); c.ellipse(cx, cy, r*1.15, r, 0, 0, Math.PI*2); c.fill();
+            c.strokeStyle = '#c25400'; c.lineWidth = 3;
+            [-0.6, 0, 0.6].forEach(k => { c.beginPath(); c.ellipse(cx + k*r, cy, r*0.45, r, 0, 0, Math.PI*2); c.stroke(); });
+            c.fillStyle = '#2f6b2f'; c.fillRect(cx - 6, cy - r - 14, 12, 18);
+            c.fillStyle = '#ffd54a';
+            c.beginPath(); c.moveTo(cx - r*0.6, cy - r*0.1); c.lineTo(cx - r*0.2, cy - r*0.1); c.lineTo(cx - r*0.4, cy - r*0.5); c.fill();
+            c.beginPath(); c.moveTo(cx + r*0.2, cy - r*0.1); c.lineTo(cx + r*0.6, cy - r*0.1); c.lineTo(cx + r*0.4, cy - r*0.5); c.fill();
+            c.beginPath(); c.moveTo(cx - r*0.6, cy + r*0.25); c.lineTo(cx - r*0.3, cy + r*0.55); c.lineTo(cx - r*0.1, cy + r*0.35);
+            c.lineTo(cx + r*0.1, cy + r*0.55); c.lineTo(cx + r*0.3, cy + r*0.35); c.lineTo(cx + r*0.6, cy + r*0.25);
+            c.lineTo(cx + r*0.4, cy + r*0.7); c.lineTo(cx - r*0.4, cy + r*0.7); c.fill();
         } else {
             c.fillStyle = '#888888'; c.fillRect(x + 20, y + 20, size - 40, size - 40);
             c.fillStyle = '#ffffff'; c.font = `bold ${size/2}px sans-serif`; c.textAlign = 'center'; c.fillText('?', x + size/2, y + size/2 + 10);
@@ -1005,7 +1018,7 @@
     $('btnReroll').addEventListener('click', () => { bgSeed = (Math.random() * 1e9) | 0; renderCanvas(); });
 
     /* ===================================================================
-       TEMA (35)
+       TEMA (36)
     =================================================================== */
     const themes = {
         retro: {
@@ -1636,6 +1649,91 @@
                 }
                 c.fillStyle = '#e2e8f0';
                 c.fillRect(0, h - 25, w, 8);
+            }
+        }
+        ,
+        halloween: {
+            titleFont: "'Creepster', cursive", titleSize: 70, titleColor: '#ff8a1f', titleShadow: '#9333ea',
+            subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#e9d5ff', subShadow: '#000000',
+            pixelatedImage: false, shadowOffsetX: 4, shadowOffsetY: 4, outline: false,
+            drawBackground: (c, w, h) => {
+                // Langit malam ungu dengan cahaya oranye di cakrawala
+                const sky = c.createLinearGradient(0, 0, 0, h);
+                sky.addColorStop(0, '#14062a'); sky.addColorStop(0.65, '#3b0f5e'); sky.addColorStop(1, '#7a2a1a');
+                c.fillStyle = sky; c.fillRect(0, 0, w, h);
+
+                // Bintang
+                c.fillStyle = 'rgba(255, 244, 214, 0.8)';
+                for (let i = 0; i < 40; i++) { c.beginPath(); c.arc(Math.random()*w, Math.random()*h*0.6, Math.random()*1.6 + 0.3, 0, Math.PI*2); c.fill(); }
+
+                // Bulan purnama
+                c.save();
+                c.shadowBlur = 40; c.shadowColor = 'rgba(255, 220, 140, 0.9)';
+                c.fillStyle = '#ffe9a8'; c.beginPath(); c.arc(w - 170, 85, 52, 0, Math.PI*2); c.fill();
+                c.restore();
+                c.fillStyle = 'rgba(214, 180, 110, 0.5)';
+                c.beginPath(); c.arc(w - 185, 72, 9, 0, Math.PI*2); c.fill();
+                c.beginPath(); c.arc(w - 152, 100, 6, 0, Math.PI*2); c.fill();
+                c.beginPath(); c.arc(w - 170, 62, 5, 0, Math.PI*2); c.fill();
+
+                // Kelelawar
+                const bat = (x, y, s) => {
+                    c.fillStyle = '#0b0214';
+                    c.beginPath(); c.ellipse(x, y, 5*s, 7*s, 0, 0, Math.PI*2); c.fill();
+                    c.beginPath(); c.moveTo(x - 3*s, y - 5*s); c.lineTo(x - 5*s, y - 11*s); c.lineTo(x - 1*s, y - 6*s); c.fill();
+                    c.beginPath(); c.moveTo(x + 3*s, y - 5*s); c.lineTo(x + 5*s, y - 11*s); c.lineTo(x + 1*s, y - 6*s); c.fill();
+                    c.beginPath(); c.moveTo(x - 3*s, y - 2*s);
+                    c.quadraticCurveTo(x - 16*s, y - 14*s, x - 30*s, y - 2*s);
+                    c.quadraticCurveTo(x - 24*s, y + 1*s, x - 20*s, y + 6*s);
+                    c.quadraticCurveTo(x - 14*s, y + 1*s, x - 9*s, y + 7*s);
+                    c.quadraticCurveTo(x - 6*s, y + 3*s, x - 3*s, y + 4*s); c.fill();
+                    c.beginPath(); c.moveTo(x + 3*s, y - 2*s);
+                    c.quadraticCurveTo(x + 16*s, y - 14*s, x + 30*s, y - 2*s);
+                    c.quadraticCurveTo(x + 24*s, y + 1*s, x + 20*s, y + 6*s);
+                    c.quadraticCurveTo(x + 14*s, y + 1*s, x + 9*s, y + 7*s);
+                    c.quadraticCurveTo(x + 6*s, y + 3*s, x + 3*s, y + 4*s); c.fill();
+                };
+                bat(w * 0.46, 48, 0.9);
+                bat(w * 0.62, 70, 0.7);
+                bat(w * 0.78, 42, 1.1);
+
+                // Bukit gelap di bawah
+                c.fillStyle = '#0b0214';
+                c.beginPath(); c.moveTo(0, h);
+                for (let x = 0; x <= w; x += 20) { c.lineTo(x, h - 22 - Math.sin(x / 90) * 10 - Math.random() * 4); }
+                c.lineTo(w, h); c.fill();
+
+                // Labu
+                const pumpkin = (x, y, r) => {
+                    c.fillStyle = '#ff7a00'; c.beginPath(); c.ellipse(x, y, r*1.15, r, 0, 0, Math.PI*2); c.fill();
+                    c.strokeStyle = '#c25400'; c.lineWidth = 2;
+                    [-0.6, 0, 0.6].forEach(k => { c.beginPath(); c.ellipse(x + k*r, y, r*0.45, r, 0, 0, Math.PI*2); c.stroke(); });
+                    c.fillStyle = '#2f6b2f'; c.fillRect(x - 3, y - r - 8, 6, 11);
+                    c.fillStyle = '#ffd54a';
+                    c.beginPath(); c.moveTo(x - r*0.6, y - r*0.1); c.lineTo(x - r*0.2, y - r*0.1); c.lineTo(x - r*0.4, y - r*0.5); c.fill();
+                    c.beginPath(); c.moveTo(x + r*0.2, y - r*0.1); c.lineTo(x + r*0.6, y - r*0.1); c.lineTo(x + r*0.4, y - r*0.5); c.fill();
+                    c.beginPath(); c.moveTo(x - r*0.6, y + r*0.25); c.lineTo(x - r*0.3, y + r*0.55); c.lineTo(x - r*0.1, y + r*0.35);
+                    c.lineTo(x + r*0.1, y + r*0.55); c.lineTo(x + r*0.3, y + r*0.35); c.lineTo(x + r*0.6, y + r*0.25);
+                    c.lineTo(x + r*0.4, y + r*0.7); c.lineTo(x - r*0.4, y + r*0.7); c.fill();
+                };
+                pumpkin(w - 300, h - 36, 24);
+                pumpkin(w - 235, h - 40, 32);
+                pumpkin(w - 90, h - 38, 28);
+
+                // Sarang laba-laba di pojok kiri atas
+                c.strokeStyle = 'rgba(255, 255, 255, 0.35)'; c.lineWidth = 1.2;
+                for (let a = 0; a <= 90; a += 18) {
+                    c.beginPath(); c.moveTo(0, 0);
+                    c.lineTo(Math.cos(a*Math.PI/180) * 95, Math.sin(a*Math.PI/180) * 95); c.stroke();
+                }
+                for (let r = 25; r <= 95; r += 23) {
+                    c.beginPath();
+                    for (let a = 0; a <= 90; a += 18) {
+                        const px = Math.cos(a*Math.PI/180) * r, py = Math.sin(a*Math.PI/180) * r;
+                        if (a === 0) c.moveTo(px, py); else c.lineTo(px, py);
+                    }
+                    c.stroke();
+                }
             }
         }
     };
