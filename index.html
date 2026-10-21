@@ -327,6 +327,7 @@
                     <button class="tab" role="tab" id="tab-upload" aria-controls="panel-upload" aria-selected="true">Unggah</button>
                     <button class="tab" role="tab" id="tab-modrinth" aria-controls="panel-modrinth" aria-selected="false">Modrinth</button>
                     <button class="tab" role="tab" id="tab-curseforge" aria-controls="panel-curseforge" aria-selected="false">CurseForge</button>
+                    <button class="tab" role="tab" id="tab-planetmc" aria-controls="panel-planetmc" aria-selected="false">Planet MC</button>
                 </div>
 
                 <!-- Unggah -->
@@ -367,6 +368,16 @@
                     </div>
                     <p class="status" id="cfStatus" aria-live="polite"></p>
                     <div class="results" id="cfResults"></div>
+                </div>
+
+                <!-- Planet Minecraft -->
+                <div class="panel" id="panel-planetmc" role="tabpanel" aria-labelledby="tab-planetmc" hidden>
+                    <div class="row">
+                        <input type="text" id="pmcQuery" placeholder="Link planetminecraft.com/..." autocomplete="off">
+                        <button id="pmcGo" type="button">Ambil</button>
+                    </div>
+                    <p class="hint">Contoh: <code>https://www.planetminecraft.com/mod/nama-mod/</code>. Planet Minecraft tidak punya API resmi, jadi data dibaca dari halamannya lewat proxy (URL proxy diisi di tab CurseForge). Kalau gagal, unggah gambarnya manual di tab Unggah dan isi nama creator sendiri.</p>
+                    <p class="status" id="pmcStatus" aria-live="polite"></p>
                 </div>
 
                 <!-- Info proyek terpilih -->
@@ -670,7 +681,7 @@
     /* ===================================================================
        UI: TAB, STATUS, HASIL
     =================================================================== */
-    const tabs = ['upload', 'modrinth', 'curseforge'];
+    const tabs = ['upload', 'modrinth', 'curseforge', 'planetmc'];
     function selectTab(name) {
         tabs.forEach(t => {
             const on = t === name;
@@ -914,6 +925,50 @@
     }
     $('cfGo').addEventListener('click', cfRun);
     $('cfQuery').addEventListener('keydown', e => { if (e.key === 'Enter') cfRun(); });
+
+    /* ===================================================================
+       PLANET MINECRAFT  (tanpa API resmi: dibaca dari halaman lewat proxy)
+    =================================================================== */
+    function parsePmcInput(v) {
+        v = v.trim();
+        if (!/^https?:\/\//i.test(v) && /^(www\.)?planetminecraft\.com\//i.test(v)) v = 'https://' + v;
+        try {
+            const u = new URL(v);
+            if (/(^|\.)planetminecraft\.com$/i.test(u.hostname)) return u.toString();
+        } catch {}
+        return null;
+    }
+
+    async function pmcRun() {
+        const st = $('pmcStatus'), btn = $('pmcGo');
+        const link = parsePmcInput($('pmcQuery').value);
+        if (!link) { setStatus(st, 'Tempel link lengkap dari planetminecraft.com.', 'err'); return; }
+        const base = cfProxyBase();
+        if (!base) { setStatus(st, 'Isi URL proxy dulu (di tab CurseForge).', 'err'); return; }
+
+        btn.disabled = true; setStatus(st, 'Mengambil data...');
+        try {
+            const res = await fetch(`${base}/pmc?url=${encodeURIComponent(link)}`, { headers: { Accept: 'application/json' } });
+            let data = {};
+            try { data = await res.json(); } catch {}
+            if (!res.ok || data.error) {
+                throw new Error(data.error || ('Proxy error ' + res.status));
+            }
+            if (!data.title && !data.image) throw new Error('Data tidak ditemukan di halaman itu.');
+
+            await applyProject({
+                title: data.title || 'Planet Minecraft',
+                creator: data.author || '',
+                images: data.image ? [{ url: data.image, label: 'Gambar utama' }] : [],
+                source: 'Planet Minecraft'
+            });
+            setStatus(st, data.author ? 'Proyek dimuat.' : 'Dimuat, tapi nama creator tidak terbaca. Isi manual di sub judul.', data.author ? 'ok' : '');
+        } catch (e) {
+            setStatus(st, (e.message || 'Gagal mengambil data.') + ' Coba unggah gambar manual.', 'err');
+        } finally { btn.disabled = false; }
+    }
+    $('pmcGo').addEventListener('click', pmcRun);
+    $('pmcQuery').addEventListener('keydown', e => { if (e.key === 'Enter') pmcRun(); });
 
     /* ===================================================================
        EVENT LAIN
