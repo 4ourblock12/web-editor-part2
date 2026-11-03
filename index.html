@@ -277,7 +277,7 @@
     <div class="app-container">
 
         <div class="controls">
-            <h2>Title Maker (36 Themes)</h2>
+            <h2>Title Maker (38 Themes)</h2>
 
             <div class="input-group">
                 <label for="themeSelect">Tema game</label>
@@ -318,6 +318,8 @@
                     <option value="minecraft">34. Minecraft / Blocky</option>
                     <option value="harvest">35. Harvest / Ranch Sim</option>
                     <option value="halloween">36. Halloween / Spooky</option>
+                    <option value="glossy">37. Glossy / Rounded</option>
+                    <option value="matte">38. Matte (Dop) / Rounded</option>
                 </select>
             </div>
 
@@ -419,7 +421,7 @@
             <div class="preview-actions">
                 <button class="secondary" type="button" id="btnReroll">Acak latar</button>
             </div>
-            <p class="instructions">Resolusi internal HD 1000x250 px.<br>Pilih dari 36 tema unik untuk segala jenis game.</p>
+            <p class="instructions">Resolusi internal HD 1000x250 px.<br>Pilih dari 38 tema unik untuk segala jenis game.</p>
         </div>
     </div>
 
@@ -529,20 +531,30 @@
         }
         ctx.shadowBlur = 0;
 
-        // Bingkai ganda
-        let frameColor = theme.titleShadow;
+        // Bingkai ganda (bisa bulat kalau tema memakai roundFrame)
+        let frameColor = theme.frameColor || theme.titleShadow;
         if (frameColor === 'transparent' || frameColor === '#000000') frameColor = theme.titleColor;
         ctx.strokeStyle = frameColor;
         ctx.lineWidth = 4;
-        ctx.strokeRect(15, 15, w - 30, h - 30);
-        ctx.strokeRect(25, 25, w - 50, h - 50);
+        if (theme.roundFrame) {
+            ctx.beginPath(); ctx.roundRect(15, 15, w - 30, h - 30, 40); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(25, 25, w - 50, h - 50, 30); ctx.stroke();
+        } else {
+            ctx.strokeRect(15, 15, w - 30, h - 30);
+            ctx.strokeRect(25, 25, w - 50, h - 50);
+        }
 
         // Ikon
         const iconSize = 160, iconX = 40, iconY = (h - iconSize) / 2;
         if (currentImage) {
+            ctx.save();
+            if (theme.roundImage) {
+                ctx.beginPath(); ctx.roundRect(iconX, iconY, iconSize, iconSize, 34); ctx.clip();
+            }
             ctx.imageSmoothingEnabled = !theme.pixelatedImage;
             drawImageContain(currentImage, iconX, iconY, iconSize);
             ctx.imageSmoothingEnabled = true;
+            ctx.restore();
         } else {
             drawDefaultIcon(ctx, iconX, iconY, iconSize, themeId);
         }
@@ -611,6 +623,23 @@
             c.beginPath(); c.moveTo(cx - r*0.6, cy + r*0.25); c.lineTo(cx - r*0.3, cy + r*0.55); c.lineTo(cx - r*0.1, cy + r*0.35);
             c.lineTo(cx + r*0.1, cy + r*0.55); c.lineTo(cx + r*0.3, cy + r*0.35); c.lineTo(cx + r*0.6, cy + r*0.25);
             c.lineTo(cx + r*0.4, cy + r*0.7); c.lineTo(cx - r*0.4, cy + r*0.7); c.fill();
+        } else if (themeId === 'glossy') {
+            // Kotak bulat mengkilap: gradien biru + kilap putih di atas
+            const pad = 6, s = size - pad * 2;
+            const g = c.createLinearGradient(0, y + pad, 0, y + pad + s);
+            g.addColorStop(0, '#7dd3fc'); g.addColorStop(0.55, '#2563eb'); g.addColorStop(1, '#1e3a8a');
+            c.fillStyle = g; c.beginPath(); c.roundRect(x + pad, y + pad, s, s, 40); c.fill();
+            c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 4; c.stroke();
+            const gl = c.createLinearGradient(0, y + pad, 0, y + pad + s * 0.55);
+            gl.addColorStop(0, 'rgba(255,255,255,0.85)'); gl.addColorStop(1, 'rgba(255,255,255,0.05)');
+            c.fillStyle = gl; c.beginPath(); c.roundRect(x + pad + 8, y + pad + 6, s - 16, s * 0.5, [32, 32, 70, 70]); c.fill();
+            c.fillStyle = '#ffffff'; c.beginPath(); c.arc(x + size/2, y + size/2 + 12, 22, 0, Math.PI*2); c.fill();
+        } else if (themeId === 'matte') {
+            // Kotak bulat matte: warna rata, tanpa kilap
+            const pad = 6, s = size - pad * 2;
+            c.fillStyle = '#d98f73'; c.beginPath(); c.roundRect(x + pad, y + pad, s, s, 40); c.fill();
+            c.fillStyle = '#c47a5e'; c.beginPath(); c.roundRect(x + pad, y + pad + s * 0.72, s, s * 0.28, [0, 0, 40, 40]); c.fill();
+            c.fillStyle = '#f3ebe0'; c.beginPath(); c.arc(x + size/2, y + size/2 - 4, 28, 0, Math.PI*2); c.fill();
         } else {
             c.fillStyle = '#888888'; c.fillRect(x + 20, y + 20, size - 40, size - 40);
             c.fillStyle = '#ffffff'; c.font = `bold ${size/2}px sans-serif`; c.textAlign = 'center'; c.fillText('?', x + size/2, y + size/2 + 10);
@@ -1018,7 +1047,7 @@
     $('btnReroll').addEventListener('click', () => { bgSeed = (Math.random() * 1e9) | 0; renderCanvas(); });
 
     /* ===================================================================
-       TEMA (36)
+       TEMA (38)
     =================================================================== */
     const themes = {
         retro: {
@@ -1650,8 +1679,7 @@
                 c.fillStyle = '#e2e8f0';
                 c.fillRect(0, h - 25, w, 8);
             }
-        }
-        ,
+        },
         halloween: {
             titleFont: "'Creepster', cursive", titleSize: 70, titleColor: '#ff8a1f', titleShadow: '#9333ea',
             subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#e9d5ff', subShadow: '#000000',
@@ -1734,6 +1762,62 @@
                     }
                     c.stroke();
                 }
+            }
+        },
+
+        /* ---------- 37. GLOSSY / ROUNDED ---------- */
+        glossy: {
+            titleFont: "'Fredoka', sans-serif", titleSize: 62, titleColor: '#ffffff', titleShadow: '#1d4ed8',
+            subFont: "'Fredoka', sans-serif", subSize: 32, subColor: '#fef08a', subShadow: '#1e3a8a',
+            pixelatedImage: false, shadowOffsetX: 0, shadowOffsetY: 0, outline: true,
+            roundFrame: true, roundImage: true, frameColor: 'rgba(255,255,255,0.85)',
+            drawBackground: (c, w, h) => {
+                const g = c.createLinearGradient(0, 0, 0, h);
+                g.addColorStop(0, '#67b7ff'); g.addColorStop(0.5, '#2563eb'); g.addColorStop(1, '#1e2a78');
+                c.fillStyle = g; c.beginPath(); c.roundRect(0, 0, w, h, 48); c.fill();
+                c.save(); c.beginPath(); c.roundRect(0, 0, w, h, 48); c.clip();
+                // cahaya dari bawah
+                const glow = c.createRadialGradient(w/2, h + 40, 10, w/2, h + 40, w/2);
+                glow.addColorStop(0, 'rgba(255,255,255,0.35)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+                c.fillStyle = glow; c.fillRect(0, 0, w, h);
+                // gelembung kaca
+                for (let i = 0; i < 14; i++) {
+                    const x = Math.random() * w, y = Math.random() * h, r = 10 + Math.random() * 28;
+                    const b = c.createRadialGradient(x - r*0.3, y - r*0.3, r*0.1, x, y, r);
+                    b.addColorStop(0, 'rgba(255,255,255,0.7)'); b.addColorStop(1, 'rgba(255,255,255,0.08)');
+                    c.fillStyle = b; c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.fill();
+                    c.strokeStyle = 'rgba(255,255,255,0.35)'; c.lineWidth = 1.5; c.stroke();
+                }
+                // kilap di bagian atas
+                const gl = c.createLinearGradient(0, 0, 0, h * 0.5);
+                gl.addColorStop(0, 'rgba(255,255,255,0.7)'); gl.addColorStop(1, 'rgba(255,255,255,0.05)');
+                c.fillStyle = gl; c.beginPath(); c.roundRect(10, 8, w - 20, h * 0.46, [40, 40, 120, 120]); c.fill();
+                c.restore();
+            }
+        },
+
+        /* ---------- 38. MATTE (DOP) / ROUNDED ---------- */
+        matte: {
+            titleFont: "'Fredoka', sans-serif", titleSize: 60, titleColor: '#f5efe6', titleShadow: '#232a27',
+            subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#e3a98f', subShadow: 'transparent',
+            pixelatedImage: false, shadowOffsetX: 3, shadowOffsetY: 3, outline: false,
+            roundFrame: true, roundImage: true, frameColor: 'rgba(245,239,230,0.55)',
+            drawBackground: (c, w, h) => {
+                // warna rata (tanpa kilap), sudut bulat
+                c.fillStyle = '#3d4743'; c.beginPath(); c.roundRect(0, 0, w, h, 48); c.fill();
+                c.save(); c.beginPath(); c.roundRect(0, 0, w, h, 48); c.clip();
+                // blok bentuk bulat dengan warna dop datar
+                c.fillStyle = '#46524d'; c.beginPath(); c.arc(w - 90, 40, 150, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#4c5953'; c.beginPath(); c.arc(w - 60, 30, 90, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#343e3a'; c.beginPath(); c.arc(120, h + 30, 130, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#b86f55'; c.beginPath(); c.roundRect(w * 0.45, h - 34, 170, 18, 9); c.fill();
+                c.fillStyle = '#d9a38b'; c.beginPath(); c.roundRect(w * 0.45 + 190, h - 34, 60, 18, 9); c.fill();
+                // butiran halus untuk tekstur dop
+                for (let i = 0; i < 700; i++) {
+                    c.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)';
+                    c.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+                }
+                c.restore();
             }
         }
     };
