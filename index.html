@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Game Title Generator</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@700&family=Orbitron:wght@800&family=Black+Ops+One&family=Fredoka:wght@600&family=Acme&family=Creepster&family=Racing+Sans+One&family=Bangers&family=Rye&family=Special+Elite&family=MedievalSharp&family=Silkscreen&family=Righteous&family=Teko:wght@600&family=Pirata+One&family=Chewy&family=Rajdhani:wght@700&family=Rubik+Dirt&family=Macondo&family=Playfair+Display:ital,wght@0,700;1,700&family=Luckiest+Guy&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@700&family=Orbitron:wght@800&family=Black+Ops+One&family=Fredoka:wght@600&family=Acme&family=Creepster&family=Racing+Sans+One&family=Bangers&family=Rye&family=Special+Elite&family=MedievalSharp&family=Silkscreen&family=Righteous&family=Teko:wght@600&family=Pirata+One&family=Chewy&family=Rajdhani:wght@700&family=Rubik+Dirt&family=Macondo&family=Playfair+Display:ital,wght@0,700;1,700&family=Luckiest+Guy&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -138,7 +138,6 @@
         .row > input, .row > select { flex: 1; min-width: 0; }
         .row > button { flex: 0 0 auto; }
 
-        /* Tab sumber gambar */
         .source-box {
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -171,7 +170,6 @@
         .status.ok { color: var(--ok); }
         .status.err { color: var(--err); }
 
-        /* Hasil pencarian */
         .results { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
         .result {
             display: flex; gap: 10px; align-items: center; text-align: left;
@@ -188,7 +186,6 @@
         .result .name { font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .result .by { font-size: .78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Proyek terpilih */
         .project-info {
             border: 1px solid var(--border-color);
             border-radius: 10px;
@@ -277,7 +274,7 @@
     <div class="app-container">
 
         <div class="controls">
-            <h2>Title Maker (38 Themes)</h2>
+            <h2>Title Maker (39 Themes)</h2>
 
             <div class="input-group">
                 <label for="themeSelect">Tema game</label>
@@ -320,6 +317,7 @@
                     <option value="halloween">36. Halloween / Spooky</option>
                     <option value="glossy">37. Glossy / Rounded</option>
                     <option value="matte">38. Matte (Dop) / Rounded</option>
+                    <option value="christmas">39. Christmas / Natal</option>
                 </select>
             </div>
 
@@ -333,13 +331,11 @@
                     <button class="tab" role="tab" id="tab-planetmc" aria-controls="panel-planetmc" aria-selected="false">Planet MC</button>
                 </div>
 
-                <!-- Unggah -->
                 <div class="panel" id="panel-upload" role="tabpanel" aria-labelledby="tab-upload">
                     <input type="file" id="imageUpload" accept="image/*" aria-label="Unggah ikon atau karakter">
                     <p class="hint">PNG transparan paling bagus hasilnya.</p>
                 </div>
 
-                <!-- Modrinth -->
                 <div class="panel" id="panel-modrinth" role="tabpanel" aria-labelledby="tab-modrinth" hidden>
                     <div class="row">
                         <select id="mrType" aria-label="Jenis proyek" style="max-width:130px">
@@ -358,7 +354,6 @@
                     <div class="results" id="mrResults"></div>
                 </div>
 
-                <!-- CurseForge -->
                 <div class="panel" id="panel-curseforge" role="tabpanel" aria-labelledby="tab-curseforge" hidden>
                     <div class="input-group">
                         <label for="cfProxy">URL proxy CurseForge</label>
@@ -373,7 +368,6 @@
                     <div class="results" id="cfResults"></div>
                 </div>
 
-                <!-- Planet Minecraft -->
                 <div class="panel" id="panel-planetmc" role="tabpanel" aria-labelledby="tab-planetmc" hidden>
                     <div class="row">
                         <input type="text" id="pmcQuery" placeholder="Link planetminecraft.com/..." autocomplete="off">
@@ -383,7 +377,6 @@
                     <p class="status" id="pmcStatus" aria-live="polite"></p>
                 </div>
 
-                <!-- Info proyek terpilih -->
                 <div class="project-info" id="projectInfo" hidden>
                     <div><b>Proyek:</b> <span id="piTitle"></span></div>
                     <div><b>Creator:</b> <span id="piCreator"></span></div>
@@ -421,7 +414,7 @@
             <div class="preview-actions">
                 <button class="secondary" type="button" id="btnReroll">Acak latar</button>
             </div>
-            <p class="instructions">Resolusi internal HD 1000x250 px.<br>Pilih dari 38 tema unik untuk segala jenis game.</p>
+            <p class="instructions">Resolusi internal HD 1000x250 px.<br>Pilih dari 39 tema unik untuk segala jenis game.</p>
         </div>
     </div>
 
@@ -446,14 +439,15 @@
     let bgSeed = 20260101;
     let renderToken = 0;
 
-    /* Penyimpanan aman (bisa gagal di mode privat) */
+    const CORNER = 48;   // radius sudut kanvas (semua tema bulat)
+
     const store = {
         get(k) { try { return localStorage.getItem(k) || ''; } catch { return ''; } },
         set(k, v) { try { localStorage.setItem(k, v); } catch {} }
     };
 
     /* ===================================================================
-       RENDER (seeded random, font aman, auto-fit teks)
+       RENDER
     =================================================================== */
     function mulberry32(a) {
         return function () {
@@ -469,7 +463,6 @@
         return h >>> 0;
     }
 
-    /* "italic 'Cinzel', serif" + 30  ->  "italic 30px 'Cinzel', serif" (urutan CSS yang benar) */
     function buildFont(spec, size) {
         const m = spec.match(/^((?:(?:italic|oblique|bold)\s+)*)(.*)$/);
         return `${m[1]}${size}px ${m[2]}`;
@@ -507,7 +500,7 @@
             ensureFont(theme.titleFont, theme.titleSize),
             ensureFont(theme.subFont, theme.subSize)
         ]);
-        if (token !== renderToken) return;   // ada render yang lebih baru
+        if (token !== renderToken) return;
         draw();
     }
 
@@ -518,39 +511,40 @@
 
         ctx.save();
         ctx.clearRect(0, 0, w, h);
+        // Semua tema bersudut bulat: potong seluruh kanvas dengan rounded rect
+        ctx.beginPath(); ctx.roundRect(0, 0, w, h, CORNER); ctx.clip();
         ctx.textAlign = 'left';
         ctx.setLineDash([]);
 
-        // Latar memakai Math.random -> kita kunci dengan seed supaya tidak berubah tiap ketikan
         const realRandom = Math.random;
         Math.random = mulberry32(bgSeed ^ hashStr(themeId));
+        // Border persegi bawaan tiap tema otomatis dibulatkan, konsentris dengan sudut kanvas
+        ctx.strokeRect = function (x, y, rw, rh) {
+            ctx.beginPath();
+            ctx.roundRect(x, y, rw, rh, Math.max(8, CORNER - Math.min(x, y)));
+            ctx.stroke();
+        };
         try {
             theme.drawBackground(ctx, w, h);
         } finally {
             Math.random = realRandom;
+            delete ctx.strokeRect;
         }
         ctx.shadowBlur = 0;
 
-        // Bingkai ganda (bisa bulat kalau tema memakai roundFrame)
+        // Bingkai ganda bulat (selalu)
         let frameColor = theme.frameColor || theme.titleShadow;
         if (frameColor === 'transparent' || frameColor === '#000000') frameColor = theme.titleColor;
         ctx.strokeStyle = frameColor;
         ctx.lineWidth = 4;
-        if (theme.roundFrame) {
-            ctx.beginPath(); ctx.roundRect(15, 15, w - 30, h - 30, 40); ctx.stroke();
-            ctx.beginPath(); ctx.roundRect(25, 25, w - 50, h - 50, 30); ctx.stroke();
-        } else {
-            ctx.strokeRect(15, 15, w - 30, h - 30);
-            ctx.strokeRect(25, 25, w - 50, h - 50);
-        }
+        ctx.beginPath(); ctx.roundRect(15, 15, w - 30, h - 30, 40); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(25, 25, w - 50, h - 50, 30); ctx.stroke();
 
-        // Ikon
+        // Ikon (selalu bulat)
         const iconSize = 160, iconX = 40, iconY = (h - iconSize) / 2;
         if (currentImage) {
             ctx.save();
-            if (theme.roundImage) {
-                ctx.beginPath(); ctx.roundRect(iconX, iconY, iconSize, iconSize, 34); ctx.clip();
-            }
+            ctx.beginPath(); ctx.roundRect(iconX, iconY, iconSize, iconSize, 34); ctx.clip();
             ctx.imageSmoothingEnabled = !theme.pixelatedImage;
             drawImageContain(currentImage, iconX, iconY, iconSize);
             ctx.imageSmoothingEnabled = true;
@@ -623,8 +617,19 @@
             c.beginPath(); c.moveTo(cx - r*0.6, cy + r*0.25); c.lineTo(cx - r*0.3, cy + r*0.55); c.lineTo(cx - r*0.1, cy + r*0.35);
             c.lineTo(cx + r*0.1, cy + r*0.55); c.lineTo(cx + r*0.3, cy + r*0.35); c.lineTo(cx + r*0.6, cy + r*0.25);
             c.lineTo(cx + r*0.4, cy + r*0.7); c.lineTo(cx - r*0.4, cy + r*0.7); c.fill();
+        } else if (themeId === 'christmas') {
+            const cx = x + size/2, cy = y + size/2 + 12, r = size/3;
+            c.fillStyle = '#d4af37'; c.fillRect(cx - 12, cy - r - 14, 24, 14);
+            c.strokeStyle = '#d4af37'; c.lineWidth = 3;
+            c.beginPath(); c.arc(cx, cy - r - 18, 7, 0, Math.PI*2); c.stroke();
+            const bg = c.createRadialGradient(cx - r*0.35, cy - r*0.35, r*0.1, cx, cy, r);
+            bg.addColorStop(0, '#ff6b6b'); bg.addColorStop(1, '#991b1b');
+            c.fillStyle = bg; c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2); c.fill();
+            c.strokeStyle = '#fde68a'; c.lineWidth = 5;
+            c.beginPath(); c.arc(cx, cy, r*0.6, 0.15*Math.PI, 0.85*Math.PI); c.stroke();
+            c.fillStyle = 'rgba(255,255,255,0.7)';
+            c.beginPath(); c.ellipse(cx - r*0.4, cy - r*0.45, r*0.18, r*0.1, -0.6, 0, Math.PI*2); c.fill();
         } else if (themeId === 'glossy') {
-            // Kotak bulat mengkilap: gradien biru + kilap putih di atas
             const pad = 6, s = size - pad * 2;
             const g = c.createLinearGradient(0, y + pad, 0, y + pad + s);
             g.addColorStop(0, '#7dd3fc'); g.addColorStop(0.55, '#2563eb'); g.addColorStop(1, '#1e3a8a');
@@ -635,7 +640,6 @@
             c.fillStyle = gl; c.beginPath(); c.roundRect(x + pad + 8, y + pad + 6, s - 16, s * 0.5, [32, 32, 70, 70]); c.fill();
             c.fillStyle = '#ffffff'; c.beginPath(); c.arc(x + size/2, y + size/2 + 12, 22, 0, Math.PI*2); c.fill();
         } else if (themeId === 'matte') {
-            // Kotak bulat matte: warna rata, tanpa kilap
             const pad = 6, s = size - pad * 2;
             c.fillStyle = '#d98f73'; c.beginPath(); c.roundRect(x + pad, y + pad, s, s, 40); c.fill();
             c.fillStyle = '#c47a5e'; c.beginPath(); c.roundRect(x + pad, y + pad + s * 0.72, s, s * 0.28, [0, 0, 40, 40]); c.fill();
@@ -684,7 +688,6 @@
 
     /* ===================================================================
        PEMUAT GAMBAR (aman untuk canvas)
-       1) crossOrigin langsung  2) fetch -> blob  3) lewat proxy
     =================================================================== */
     function tryLoad(src, cors) {
         return new Promise((resolve, reject) => {
@@ -764,7 +767,6 @@
         });
     }
 
-    /* Terapkan proyek terpilih ke editor */
     async function applyProject(p) {
         currentProject = p;
         $('piTitle').textContent = p.title;
@@ -814,7 +816,7 @@
     });
 
     /* ===================================================================
-       MODRINTH  (API publik, mendukung CORS, tanpa API key)
+       MODRINTH
     =================================================================== */
     const MR = 'https://api.modrinth.com/v2';
 
@@ -892,7 +894,7 @@
     $('mrQuery').addEventListener('keydown', e => { if (e.key === 'Enter') mrRun(); });
 
     /* ===================================================================
-       CURSEFORGE  (lewat proxy; API key disimpan di proxy, bukan di web)
+       CURSEFORGE (lewat proxy)
     =================================================================== */
     const CF_GAME_MINECRAFT = 432;
     const CF_CLASS = {
@@ -969,7 +971,7 @@
     $('cfQuery').addEventListener('keydown', e => { if (e.key === 'Enter') cfRun(); });
 
     /* ===================================================================
-       PLANET MINECRAFT  (tanpa API resmi: dibaca dari halaman lewat proxy)
+       PLANET MINECRAFT (lewat proxy)
     =================================================================== */
     function parsePmcInput(v) {
         v = v.trim();
@@ -1021,7 +1023,6 @@
     subtitleInput.addEventListener('input', debouncedRender);
     themeSelect.addEventListener('change', renderCanvas);
 
-    // Ubah format sub judul -> perbarui sub judul bila ada proyek
     subTemplate.addEventListener('input', () => {
         if (currentProject && autoFill.checked) {
             subtitleInput.value = (subTemplate.value || '')
@@ -1047,7 +1048,7 @@
     $('btnReroll').addEventListener('click', () => { bgSeed = (Math.random() * 1e9) | 0; renderCanvas(); });
 
     /* ===================================================================
-       TEMA (38)
+       TEMA (39)
     =================================================================== */
     const themes = {
         retro: {
@@ -1685,16 +1686,13 @@
             subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#e9d5ff', subShadow: '#000000',
             pixelatedImage: false, shadowOffsetX: 4, shadowOffsetY: 4, outline: false,
             drawBackground: (c, w, h) => {
-                // Langit malam ungu dengan cahaya oranye di cakrawala
                 const sky = c.createLinearGradient(0, 0, 0, h);
                 sky.addColorStop(0, '#14062a'); sky.addColorStop(0.65, '#3b0f5e'); sky.addColorStop(1, '#7a2a1a');
                 c.fillStyle = sky; c.fillRect(0, 0, w, h);
 
-                // Bintang
                 c.fillStyle = 'rgba(255, 244, 214, 0.8)';
                 for (let i = 0; i < 40; i++) { c.beginPath(); c.arc(Math.random()*w, Math.random()*h*0.6, Math.random()*1.6 + 0.3, 0, Math.PI*2); c.fill(); }
 
-                // Bulan purnama
                 c.save();
                 c.shadowBlur = 40; c.shadowColor = 'rgba(255, 220, 140, 0.9)';
                 c.fillStyle = '#ffe9a8'; c.beginPath(); c.arc(w - 170, 85, 52, 0, Math.PI*2); c.fill();
@@ -1704,7 +1702,6 @@
                 c.beginPath(); c.arc(w - 152, 100, 6, 0, Math.PI*2); c.fill();
                 c.beginPath(); c.arc(w - 170, 62, 5, 0, Math.PI*2); c.fill();
 
-                // Kelelawar
                 const bat = (x, y, s) => {
                     c.fillStyle = '#0b0214';
                     c.beginPath(); c.ellipse(x, y, 5*s, 7*s, 0, 0, Math.PI*2); c.fill();
@@ -1725,13 +1722,11 @@
                 bat(w * 0.62, 70, 0.7);
                 bat(w * 0.78, 42, 1.1);
 
-                // Bukit gelap di bawah
                 c.fillStyle = '#0b0214';
                 c.beginPath(); c.moveTo(0, h);
                 for (let x = 0; x <= w; x += 20) { c.lineTo(x, h - 22 - Math.sin(x / 90) * 10 - Math.random() * 4); }
                 c.lineTo(w, h); c.fill();
 
-                // Labu
                 const pumpkin = (x, y, r) => {
                     c.fillStyle = '#ff7a00'; c.beginPath(); c.ellipse(x, y, r*1.15, r, 0, 0, Math.PI*2); c.fill();
                     c.strokeStyle = '#c25400'; c.lineWidth = 2;
@@ -1748,7 +1743,6 @@
                 pumpkin(w - 235, h - 40, 32);
                 pumpkin(w - 90, h - 38, 28);
 
-                // Sarang laba-laba di pojok kiri atas
                 c.strokeStyle = 'rgba(255, 255, 255, 0.35)'; c.lineWidth = 1.2;
                 for (let a = 0; a <= 90; a += 18) {
                     c.beginPath(); c.moveTo(0, 0);
@@ -1770,17 +1764,15 @@
             titleFont: "'Fredoka', sans-serif", titleSize: 62, titleColor: '#ffffff', titleShadow: '#1d4ed8',
             subFont: "'Fredoka', sans-serif", subSize: 32, subColor: '#fef08a', subShadow: '#1e3a8a',
             pixelatedImage: false, shadowOffsetX: 0, shadowOffsetY: 0, outline: true,
-            roundFrame: true, roundImage: true, frameColor: 'rgba(255,255,255,0.85)',
+            frameColor: 'rgba(255,255,255,0.85)',
             drawBackground: (c, w, h) => {
                 const g = c.createLinearGradient(0, 0, 0, h);
                 g.addColorStop(0, '#67b7ff'); g.addColorStop(0.5, '#2563eb'); g.addColorStop(1, '#1e2a78');
                 c.fillStyle = g; c.beginPath(); c.roundRect(0, 0, w, h, 48); c.fill();
                 c.save(); c.beginPath(); c.roundRect(0, 0, w, h, 48); c.clip();
-                // cahaya dari bawah
                 const glow = c.createRadialGradient(w/2, h + 40, 10, w/2, h + 40, w/2);
                 glow.addColorStop(0, 'rgba(255,255,255,0.35)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
                 c.fillStyle = glow; c.fillRect(0, 0, w, h);
-                // gelembung kaca
                 for (let i = 0; i < 14; i++) {
                     const x = Math.random() * w, y = Math.random() * h, r = 10 + Math.random() * 28;
                     const b = c.createRadialGradient(x - r*0.3, y - r*0.3, r*0.1, x, y, r);
@@ -1788,7 +1780,6 @@
                     c.fillStyle = b; c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.fill();
                     c.strokeStyle = 'rgba(255,255,255,0.35)'; c.lineWidth = 1.5; c.stroke();
                 }
-                // kilap di bagian atas
                 const gl = c.createLinearGradient(0, 0, 0, h * 0.5);
                 gl.addColorStop(0, 'rgba(255,255,255,0.7)'); gl.addColorStop(1, 'rgba(255,255,255,0.05)');
                 c.fillStyle = gl; c.beginPath(); c.roundRect(10, 8, w - 20, h * 0.46, [40, 40, 120, 120]); c.fill();
@@ -1801,28 +1792,83 @@
             titleFont: "'Fredoka', sans-serif", titleSize: 60, titleColor: '#f5efe6', titleShadow: '#232a27',
             subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#e3a98f', subShadow: 'transparent',
             pixelatedImage: false, shadowOffsetX: 3, shadowOffsetY: 3, outline: false,
-            roundFrame: true, roundImage: true, frameColor: 'rgba(245,239,230,0.55)',
+            frameColor: 'rgba(245,239,230,0.55)',
             drawBackground: (c, w, h) => {
-                // warna rata (tanpa kilap), sudut bulat
                 c.fillStyle = '#3d4743'; c.beginPath(); c.roundRect(0, 0, w, h, 48); c.fill();
                 c.save(); c.beginPath(); c.roundRect(0, 0, w, h, 48); c.clip();
-                // blok bentuk bulat dengan warna dop datar
                 c.fillStyle = '#46524d'; c.beginPath(); c.arc(w - 90, 40, 150, 0, Math.PI*2); c.fill();
                 c.fillStyle = '#4c5953'; c.beginPath(); c.arc(w - 60, 30, 90, 0, Math.PI*2); c.fill();
                 c.fillStyle = '#343e3a'; c.beginPath(); c.arc(120, h + 30, 130, 0, Math.PI*2); c.fill();
                 c.fillStyle = '#b86f55'; c.beginPath(); c.roundRect(w * 0.45, h - 34, 170, 18, 9); c.fill();
                 c.fillStyle = '#d9a38b'; c.beginPath(); c.roundRect(w * 0.45 + 190, h - 34, 60, 18, 9); c.fill();
-                // butiran halus untuk tekstur dop
                 for (let i = 0; i < 700; i++) {
                     c.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)';
                     c.fillRect(Math.random() * w, Math.random() * h, 2, 2);
                 }
                 c.restore();
             }
+        },
+
+        /* ---------- 39. CHRISTMAS / NATAL ---------- */
+        christmas: {
+            titleFont: "'Mountains of Christmas', cursive", titleSize: 66, titleColor: '#ffffff', titleShadow: '#b91c1c',
+            subFont: "'Fredoka', sans-serif", subSize: 30, subColor: '#fde68a', subShadow: '#14532d',
+            pixelatedImage: false, shadowOffsetX: 0, shadowOffsetY: 0, outline: true,
+            frameColor: '#fde68a',
+            drawBackground: (c, w, h) => {
+                // langit malam hijau pinus
+                const g = c.createLinearGradient(0, 0, 0, h);
+                g.addColorStop(0, '#0f3d2e'); g.addColorStop(1, '#06200f');
+                c.fillStyle = g; c.fillRect(0, 0, w, h);
+
+                // salju turun
+                c.fillStyle = 'rgba(255,255,255,0.85)';
+                for (let i = 0; i < 70; i++) {
+                    c.beginPath(); c.arc(Math.random()*w, Math.random()*h, Math.random()*2.5 + 0.6, 0, Math.PI*2); c.fill();
+                }
+
+                // tanah bersalju
+                c.fillStyle = '#f1f5f9'; c.beginPath(); c.moveTo(0, h);
+                for (let x = 0; x <= w; x += 20) c.lineTo(x, h - 20 - Math.sin(x/70)*8 - Math.random()*3);
+                c.lineTo(w, h); c.fill();
+
+                // untaian lampu
+                const lampY = x => 26 + Math.sin(x/55) * 9;
+                c.strokeStyle = '#111827'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, lampY(0));
+                for (let x = 0; x <= w; x += 8) c.lineTo(x, lampY(x));
+                c.stroke();
+                const cols = ['#ef4444', '#facc15', '#22c55e', '#38bdf8'];
+                for (let x = 30, i = 0; x < w; x += 48, i++) {
+                    c.save(); c.shadowBlur = 14; c.shadowColor = cols[i % 4]; c.fillStyle = cols[i % 4];
+                    c.beginPath(); c.ellipse(x, lampY(x) + 8, 5, 8, 0, 0, Math.PI*2); c.fill(); c.restore();
+                }
+
+                // pohon natal di kanan
+                const tx = w - 95, by = h - 30;
+                c.fillStyle = '#5b3a1e'; c.fillRect(tx - 7, by - 6, 14, 16);
+                [[by - 6, 46, '#15803d'], [by - 44, 36, '#16a34a'], [by - 80, 26, '#22c55e']].forEach(([y, hw, col]) => {
+                    c.fillStyle = col; c.beginPath();
+                    c.moveTo(tx, y - 54); c.lineTo(tx + hw, y); c.lineTo(tx - hw, y); c.fill();
+                });
+                [[-14, -4, '#ef4444'], [16, -30, '#facc15'], [-8, -64, '#38bdf8'], [10, -90, '#ef4444'], [-22, -26, '#facc15']]
+                    .forEach(([dx, dy, col]) => {
+                        c.fillStyle = col; c.beginPath(); c.arc(tx + dx, by + dy, 4.5, 0, Math.PI*2); c.fill();
+                    });
+                // bintang
+                c.save(); c.shadowBlur = 16; c.shadowColor = '#fde047'; c.fillStyle = '#fde047'; c.beginPath();
+                for (let k = 0; k < 10; k++) {
+                    const rad = k % 2 ? 6 : 14, a = -Math.PI/2 + k * Math.PI/5;
+                    c.lineTo(tx + Math.cos(a) * rad, by - 138 + Math.sin(a) * rad);
+                }
+                c.fill(); c.restore();
+
+                // kado kecil
+                c.fillStyle = '#dc2626'; c.fillRect(tx - 80, by - 14, 26, 26);
+                c.fillStyle = '#fde68a'; c.fillRect(tx - 69, by - 14, 4, 26); c.fillRect(tx - 80, by - 3, 26, 4);
+            }
         }
     };
 
-    /* Render awal setelah font siap */
     document.fonts.ready.then(renderCanvas);
     renderCanvas();
     </script>
